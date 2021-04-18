@@ -18,6 +18,7 @@ $xajax->register(XAJAX_PROCESSING_EVENT, XAJAX_PROCESSING_EVENT_INVALID, "onInva
 
 include_once RUTA_PHP_MODULO . 'interfazPerfil.php';
 include_once RUTA_PHP_MODULO . 'interfazUsuarios.php';
+include_once RUTA_PHP_MODULO . 'interfazEncuestas.php';
 
 $clsMenu = new menu();
 $dataModulos = $clsMenu->consultarMenu('1', $_SESSION["sys_perfil"]);
@@ -36,7 +37,7 @@ $xajax->processRequest();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>Minimarket</title>
+    <title>Encuestas Dinámicas</title>
 
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/solid.js"></script>
