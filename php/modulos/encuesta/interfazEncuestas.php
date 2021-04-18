@@ -9,6 +9,8 @@ class interfazEncuestas
         $clsabstract->legenda('fa fa-user-edit', 'Editar');
         $clsabstract->legenda('fa fa-times-circle', 'Eliminar');
         $clsabstract->legenda('fas fa-puzzle-piece', 'Agregar Sección');
+        $clsabstract->legenda('fas fa-question', 'Agregar Pregunta');
+
 
 
         $leyenda = $clsabstract->renderLegenda('30%');
@@ -122,6 +124,19 @@ class interfazEncuestas
             )
         ));
 
+        $Grid->accion(array(
+            "icono" => "fas fa-question",
+            "titulo" => "Agregar Preguntas",
+            "xajax" => array(
+                "fn" => "xajax__interfazEncuestasPreguntaNueva",
+                "parametros" => array(
+                    "flag" => "2",
+                    "campos" => array("encuesta")
+                )
+            )
+        ));
+
+
 
         $Grid->data(array(
             "criterio" => $criterio,
@@ -193,10 +208,10 @@ class interfazEncuestas
             "icono" => "fa fa-user-edit",
             "titulo" => "Editar Usuario",
             "xajax" => array(
-                "fn" => "xajax__interfazEncuestasEditar",
+                "fn" => "xajax__interfazSeccionEditar",
                 "parametros" => array(
                     "flag" => "2",
-                    "campos" => array("encuesta")
+                    "campos" => array("encuesta", "seccion", "titulo", "orden", "activo")
                 )
             )
         ));
@@ -304,7 +319,7 @@ class interfazEncuestas
         $html = '
             <form name="form" id="form" class="form-horizontal" onsubmit="return false" method="post">                
                     <input type="hidden" id="hhddEncuesta" name="hhddEncuesta" value="' . $encuesta . '">
-                    <input type="hidden" id="hhddEncuesta" name="hhddSeccion">
+                    <input type="hidden" id="hhddSeccion" name="hhddSeccion">
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label" ><span style="color:red">(*)</span> Título:</label>
                         <div class="col-sm-9">
@@ -333,6 +348,52 @@ class interfazEncuestas
 
                     <div class="card-body" id="outQuerySeccion">
                         ' . $this->datagridSeccion($encuesta) . '
+                    </div>
+            </form>';
+
+        $botones = '<span style="color:red">(*) Campos Obligatorios.</span>                        
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="icon-remove"></i>Cerrar</button>                        
+            </fieldset>
+            </form>';
+        return array($html, $botones);
+    }
+
+
+
+
+    public function interfazNuevaPregunta($encuesta)
+    {
+        $claseseccion = new seccion();
+        $dataseccion = $claseseccion->consultar("1", $encuesta);
+        $html = '
+            <form name="form" id="form" class="form-horizontal" onsubmit="return false" method="post">                
+                    <input type="hidden" id="hhddEncuesta" name="hhddEncuesta" value="' . $encuesta . '">                    
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" ><span style="color:red">(*)</span> Sección:</label>
+                        <div class="col-sm-8">
+                            <select id="lstSeccion" name="lstSeccion" class="form-control">
+                                <option value="">SELECCIONAR...</option>';
+        foreach ($dataseccion as $value) {
+            $html .= '<option value="' . $value["seccion"] . '">' . $value["titulo"] . '</option>';
+        }
+        $html .= '</select>
+                        </div>
+                    </div>                                                            
+                    <div class="card-body" id="outQuerySeccion">
+                        <table style="width:100%">
+                            <tr>
+                                <td style="vertical-align: text-top">
+                                    <div id="DivConten-Selec">                                
+                                    </div>
+                                </td>
+                                <td style="width:20px">
+                                </td>
+                                <td style="vertical-align: text-top">
+                                    <div id="DivConten-NoSelec">                                 
+                                    </div>
+                                </td>
+                            </tr>                    
+                        </table>
                     </div>
             </form>';
 
@@ -512,8 +573,16 @@ function _seccionMantenimiento($flag, $form = '', $seccion = '')
             $rpta->assign("txtOrden", "value", "");
         } elseif ($result[0]['mensaje'] == 'MSG_002') {
             $rpta->alert(MSG_002);
-
             $rpta->assign("outQuerySeccion", "innerHTML", $interfaz->datagridSeccion($form["hhddEncuesta"]));
+            $rpta->assign("hhddSeccion", "value", "");
+            $rpta->assign("txtTitulo", "value", "");
+            $rpta->assign("txtOrden", "value", "");
+            $rpta->assign("spanSave01", "innerHTML", "Agregar");
+            $rpta->script("$('#chk_activo').prop('checked', true)");
+            $rpta->script("
+            $('#btnAgregarSeccion').unbind('click').click(function() {
+                xajax__seccionMantenimiento('1',xajax.getFormValues('form'));
+            });");
         } elseif ($result[0]['mensaje'] == 'MSG_003') {
             $rpta->alert(MSG_003);
             $rpta->assign("outQuerySeccion", "innerHTML", $interfaz->datagridSeccion($form["hhddEncuesta"]));
@@ -525,6 +594,48 @@ function _seccionMantenimiento($flag, $form = '', $seccion = '')
     }
     return $rpta;
 }
+
+function _interfazSeccionEditar($flag, $encuesta, $seccion, $titulo, $orden, $activo)
+{
+    $rpta = new xajaxResponse();
+    $rpta->assign("hhddEncuesta", "value", $encuesta);
+    $rpta->assign("hhddSeccion", "value", $seccion);
+    $rpta->assign("txtTitulo", "value", $titulo);
+    $rpta->assign("txtOrden", "value", $orden);
+    $rpta->assign("spanSave01", "innerHTML", "Actualizar");
+    if ($activo == '1') {
+        $rpta->script("$('#chk_activo').prop('checked', true)");
+    } else {
+        $rpta->script("$('#chk_activo').prop('checked', false)");
+    }
+
+    $rpta->script("
+        $('#btnAgregarSeccion').unbind('click').click(function() {
+            xajax__seccionMantenimiento('2',xajax.getFormValues('form'));
+        });");
+
+    return $rpta;
+}
+
+
+function _interfazEncuestasPreguntaNueva($flag, $encuesta)
+{
+    $rpta = new xajaxResponse('UTF-8');
+    $cls = new interfazEncuestas();
+    $html = $cls->interfazNuevaPregunta($encuesta);
+    $rpta->script("$('#modalMaestro').addClass('modal-lg');");
+    $rpta->script("$('#modal .modal-header h5').text('Agregar Pregunta');");
+    $rpta->assign("contenido", "innerHTML", $html[0]);
+    $rpta->assign("footer", "innerHTML", $html[1]);
+    $rpta->script("$('#modal').modal('show')");
+    $rpta->script("
+        $('#btnAgregarSeccion').unbind('click').click(function() {
+            xajax__seccionMantenimiento('1',xajax.getFormValues('form'));
+        });");
+    return $rpta;
+}
+
+
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestas');
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasNuevo');
 $xajax->register(XAJAX_FUNCTION, '_encuestasDatagrid');
@@ -532,3 +643,5 @@ $xajax->register(XAJAX_FUNCTION, '_encuestasMantenimiento');
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasEditar');
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasSeccionNueva');
 $xajax->register(XAJAX_FUNCTION, '_seccionMantenimiento');
+$xajax->register(XAJAX_FUNCTION, '_interfazSeccionEditar');
+$xajax->register(XAJAX_FUNCTION, '_interfazEncuestasPreguntaNueva');

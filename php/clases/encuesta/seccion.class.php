@@ -47,7 +47,7 @@ class seccion extends connectdb
     function consultar($flag, $criterio)
     {
         $data = array();
-        $query = "CALL sp_encuestasConsultar('$flag', '$criterio')";
+        $query = "CALL sp_seccionConsultar('$flag', '$criterio')";
         $result = parent::query($query);
         if (!isset($result['error'])) {
             foreach ($result as $row) {
