@@ -19,6 +19,7 @@ $xajax->register(XAJAX_PROCESSING_EVENT, XAJAX_PROCESSING_EVENT_INVALID, "onInva
 include_once RUTA_PHP_MODULO . 'interfazPerfil.php';
 include_once RUTA_PHP_MODULO . 'interfazUsuarios.php';
 include_once RUTA_PHP_MODULO . 'interfazEncuestas.php';
+include_once RUTA_PHP_MODULO . 'interfazPreguntas.php';
 
 $clsMenu = new menu();
 $dataModulos = $clsMenu->consultarMenu('1', $_SESSION["sys_perfil"]);
