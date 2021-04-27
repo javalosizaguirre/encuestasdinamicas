@@ -522,6 +522,49 @@ class interfazEncuestas
                 if ($item["tipopregunta"] == '16') {
                     $html .= '<input type="text" id="" name="" class="form-control" style="width:100%">';
                 }
+                if ($item["tipopregunta"] == '17') {
+                    $html .= '<input type="text" id="" name="" class="form-control datepicker" style="width:40%" readonly>';
+                }
+
+                if ($item["tipopregunta"] == '18') {
+                    $html .= '<textarea type="text" id="" name="" class="form-control" style="width:100%"></textarea>';
+                }
+                if ($item["tipopregunta"] == '19') {
+                    $dataopciones = $claseopciones->consultar('1', $item["pregunta"]);
+                    if ($item["orientacion"] == 'V') {
+                        foreach ($dataopciones as $value) {
+                            $html .= '<input type="checkbox"> &nbsp;' . $value["descripcion"] . '<p>';
+                        }
+                    } else {
+                        foreach ($dataopciones as $value) {
+                            $html .= '<input type="checkbox"> &nbsp;' . $value["descripcion"] . '&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;';
+                        }
+                    }
+                }
+
+                if ($item["tipopregunta"] == '20') {
+                    if ($item["orientacion"] == 'H') {
+                        $html .= '<input type="radio" >&nbsp;&nbsp;Si &nbsp;&nbsp;';
+                        $html .= '<input type="radio" >&nbsp;&nbsp;No';
+                    } else {
+                        $html .= '<input type="radio" >Si <p>';
+                        $html .= '<input type="radio" >No';
+                    }
+                }
+
+                if ($item["tipopregunta"] == '21') {
+                    $dataopciones = $claseopciones->consultar('1', $item["pregunta"]);
+                    if ($item["orientacion"] == 'V') {
+                        foreach ($dataopciones as $value) {
+                            $html .= '<input type="radio" name="rbt_"> &nbsp;' . $value["descripcion"] . '<p>';
+                        }
+                    } else {
+                        foreach ($dataopciones as $value) {
+                            $html .= '<input type="radio" name="rbt_"> &nbsp;' . $value["descripcion"] . '&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;';
+                        }
+                    }
+                }
+
                 if ($item["tipopregunta"] == '22') {
                     $dataopciones = $claseopciones->consultar('1', $item["pregunta"]);
                     $html .= '<select id="" name="" class="form-control" style="width:100%">
@@ -833,6 +876,10 @@ function _interfazEncuestasVisualizar($encuesta)
     $rpta->assign("contenido", "innerHTML", $html[0]);
     $rpta->assign("footer", "innerHTML", $html[1]);
     $rpta->script("$('#modal').modal('show')");
+    $rpta->script("$('.datepicker').datepicker({
+        clearBtn: true,
+        language: 'es'
+    });");
     return $rpta;
 }
 
