@@ -826,6 +826,8 @@ function _preguntaMantenimiento($flag, $form = '')
             $rpta->alert(MSG_004);
         } elseif ($result[0]['mensaje'] == 'MSG_005') {
             $rpta->alert(MSG_005);
+        } elseif ($result[0]["mensaje"] == 'MSG_009') {
+            $rpta->alert(MSG_009);
         }
     }
     return $rpta;

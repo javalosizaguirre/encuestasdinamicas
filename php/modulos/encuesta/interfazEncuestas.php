@@ -10,6 +10,7 @@ class interfazEncuestas
         $clsabstract->legenda('fa fa-times-circle', 'Eliminar');
         $clsabstract->legenda('fas fa-puzzle-piece', 'Agregar Sección');
         $clsabstract->legenda('fas fa-question', 'Agregar Pregunta');
+        $clsabstract->legenda('fas fa-search', 'Previsualizar Encuesta');
 
 
 
@@ -135,7 +136,16 @@ class interfazEncuestas
                 )
             )
         ));
-
+        $Grid->accion(array(
+            "icono" => "fas fa-search",
+            "titulo" => "Agregar Preguntas",
+            "xajax" => array(
+                "fn" => "xajax__interfazEncuestasVisualizar",
+                "parametros" => array(
+                    "campos" => array("encuesta")
+                )
+            )
+        ));
 
 
         $Grid->data(array(
@@ -256,7 +266,7 @@ class interfazEncuestas
             "icono" => "fas fa-arrow-circle-left",
             "width" => "20",
             "fnCallback" => function ($row) {
-                $cadena = '<a href="javascript:void(0)" style="color:black" onclick="xajax__operacionAgregarPregunta(\'' . $row["pregunta"] . '\', document.getElementById(\'lstSeccion\').value)"><i class="fas fa-arrow-circle-left"></i></a>';
+                $cadena = '<a href="javascript:void(0)" style="color:black" onclick="xajax__operacionAgregarPregunta(\'1\',\'' . $row["pregunta"] . '\', document.getElementById(\'lstSeccion\').value, document.getElementById(\'hhddEncuesta\').value)"><i class="fas fa-arrow-circle-left"></i></a>';
                 return $cadena;
             }
         ));
@@ -297,7 +307,7 @@ class interfazEncuestas
             "icono" => "fas fa-arrow-circle-left",
             "width" => "20",
             "fnCallback" => function ($row) {
-                $cadena = '<a href="javascript:void(0)" style="color:black" onclick="xajax__operacionAgregarPregunta(\'' . $row["pregunta"] . '\', \'' . $row["seccion"] . '\', \'2\')"><i class="fa fa-times-circle"></i></a>';
+                $cadena = '<a href="javascript:void(0)" style="color:black" onclick="xajax__operacionAgregarPregunta(\'2\',\'' . $row["pregunta"] . '\', \'' . $row["seccion"] . '\', document.getElementById(\'hhddEncuesta\').value)"><i class="fa fa-times-circle"></i></a>';
                 return $cadena;
             }
         ));
@@ -486,6 +496,55 @@ class interfazEncuestas
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="icon-remove"></i>Cerrar</button>                        
             </fieldset>
             </form>';
+        return array($html, $botones);
+    }
+
+    function interfazEncuestasVisualizar($encuesta)
+    {
+        $claseencuesta = new encuestas();
+        $claseopciones = new opciones();
+        $dataencuesta = $claseencuesta->consultar('1', $encuesta);
+        $dataseccion = $claseencuesta->consultar('3', $encuesta);
+        $html = '';
+        $html .= '<div style="width:100%" class="container-fluid">
+                    <div style="width:100%; text-align:center"><h3>' . $dataencuesta[0]["titulo"] . '</h3></div>
+                    <div style="width:100%; text-align:center"><h4>' . $dataencuesta[0]["bienvenida"] . '</h4></div>';
+        foreach ($dataseccion as $value) {
+            $html .= '            
+                <div class="card bg-light mb-3" style="width: 100%;">
+                    <div class="card-header">' . $value["titulo"] . '</div>
+                    <div class="card-body">';
+            $datapreguntas = $claseencuesta->consultar('4', $value["seccion"]);
+            $c = 1;
+            foreach ($datapreguntas as $item) {
+                $html .= '<h5 class="card-title">' . $c . '. ' . $item["nombre"] . '</h5>';
+                $c++;
+                if ($item["tipopregunta"] == '16') {
+                    $html .= '<input type="text" id="" name="" class="form-control" style="width:100%">';
+                }
+                if ($item["tipopregunta"] == '22') {
+                    $dataopciones = $claseopciones->consultar('1', $item["pregunta"]);
+                    $html .= '<select id="" name="" class="form-control" style="width:100%">
+                                    <option value="">SELECCIONAR...</option>';
+                    foreach ($dataopciones as $value) {
+                        $html .= '<option value="' . $value["opcion"] . '">' . $value["descripcion"] . '</option>';
+                    }
+                    $html .= '</select>';
+                }
+            }
+
+            $html .= '</div>
+                </div>
+            <br>';
+        }
+
+        $html .=
+            '</div>
+        <div style="width:100%; text-align:center"><h4>' . $dataencuesta[0]["despedida"] . '</h4></div>';
+
+
+
+        $botones = '<button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="icon-remove"></i>Cerrar</button>';
         return array($html, $botones);
     }
 }
@@ -746,7 +805,7 @@ function _encuestasPreguntasAgregadas($criterio, $total_regs = 0, $pagina = 1, $
     return $rpta;
 }
 
-function _operacionAgregarPregunta($pregunta, $seccion, $flag = '1')
+function _operacionAgregarPregunta($flag, $pregunta, $seccion, $encuesta)
 {
     $rpta = new xajaxResponse();
     $claseencuesta = new encuestas();
@@ -754,12 +813,26 @@ function _operacionAgregarPregunta($pregunta, $seccion, $flag = '1')
         $rpta->alert("Debe Seleccionar una sección");
     } else {
 
-        $result = $claseencuesta->mantenedorSeccionPregunta($flag, $seccion, $pregunta);
+        $result = $claseencuesta->mantenedorSeccionPregunta($flag, $seccion, $pregunta, $encuesta);
         $rpta->script("
                 xajax__encuestasPreguntasAgregadas(xajax.getFormValues('form'));
                 xajax__encuestasPreguntasDisponibles(xajax.getFormValues('form'));
                 ");
     }
+    return $rpta;
+}
+
+
+function _interfazEncuestasVisualizar($encuesta)
+{
+    $rpta = new xajaxResponse('UTF-8');
+    $cls = new interfazEncuestas();
+    $html = $cls->interfazEncuestasVisualizar($encuesta);
+    $rpta->script("$('#modalMaestro').addClass('modal-lg');");
+    $rpta->script("$('#modal .modal-header h5').text('Editar Encuesta');");
+    $rpta->assign("contenido", "innerHTML", $html[0]);
+    $rpta->assign("footer", "innerHTML", $html[1]);
+    $rpta->script("$('#modal').modal('show')");
     return $rpta;
 }
 
@@ -775,3 +848,4 @@ $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasPreguntaNueva');
 $xajax->register(XAJAX_FUNCTION, '_encuestasPreguntasAgregadas');
 $xajax->register(XAJAX_FUNCTION, '_encuestasPreguntasDisponibles');
 $xajax->register(XAJAX_FUNCTION, '_operacionAgregarPregunta');
+$xajax->register(XAJAX_FUNCTION, '_interfazEncuestasVisualizar');

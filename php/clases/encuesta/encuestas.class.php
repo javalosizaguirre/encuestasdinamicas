@@ -59,11 +59,11 @@ class encuestas extends connectdb
         return $data;
     }
 
-    function mantenedorSeccionPregunta($flag, $seccion, $pregunta, $orden = '')
+    function mantenedorSeccionPregunta($flag, $seccion, $pregunta, $encuesta)
     {
         $data = array();
         $usuario = $_SESSION["sys_usuario"];
-        $query = "CALL sp_seccionpreguntaMantenedor('$flag', '$seccion', '$pregunta','$orden', '$usuario')";
+        $query = "CALL sp_seccionpreguntaMantenedor('$flag', '$seccion', '$pregunta','$encuesta', '$usuario')";
         $result = parent::query($query);
         if (!isset($result['error'])) {
             foreach ($result as $row) {
