@@ -7,3 +7,4 @@ define('MSG_005', 'El registro esta siendo usado en otras operaciones');
 define('MSG_006', 'El Comprobante fue anulado');
 define('MSG_007', 'Ya existe una proceso de apertura y cierre para la caja y fecha seleccionadas');
 define('MSG_008', 'El registro fue reaperturado correctamente');
+define('MSG_009', 'La pregunta cuenta con opciones, por favor elimine las opciones e intente nuevamente.');

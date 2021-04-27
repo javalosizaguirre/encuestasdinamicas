@@ -232,6 +232,89 @@ class interfazEncuestas
         return $html;
     }
 
+
+    function datagridPreguntasDisponibles($criterio, $total_regs = 0, $pagina = 1, $nreg_x_pag = 50)
+    {
+        $Grid = new eGrid();
+        $Grid->numeracion();
+        $Grid->columna(array(
+            "titulo" => "Pregunta",
+            "campo" => "nombre",
+            "width" => "100"
+        ));
+
+        /*
+        $Grid->columna(array(
+            "titulo" => "Tipo de Pregunta",
+            "campo" => "descripcion",
+            "width" => "100"
+        ));
+        */
+
+
+        $Grid->accion(array(
+            "icono" => "fas fa-arrow-circle-left",
+            "width" => "20",
+            "fnCallback" => function ($row) {
+                $cadena = '<a href="javascript:void(0)" style="color:black" onclick="xajax__operacionAgregarPregunta(\'' . $row["pregunta"] . '\', document.getElementById(\'lstSeccion\').value)"><i class="fas fa-arrow-circle-left"></i></a>';
+                return $cadena;
+            }
+        ));
+
+
+        $Grid->data(array(
+            "criterio" => $criterio,
+            "total" => $Grid->totalRegistros,
+            "pagina" => $pagina,
+            "nRegPagina" => $nreg_x_pag,
+            "class" => "pregunta",
+            "method" => "buscarDisponibles"
+        ));
+
+        $html = $Grid->render();
+        return $html;
+    }
+
+    function datagridPreguntasAgregadas($criterio, $total_regs = 0, $pagina = 1, $nreg_x_pag = 50)
+    {
+        $Grid = new eGrid();
+        $Grid->numeracion();
+        $Grid->columna(array(
+            "titulo" => "Pregunta",
+            "campo" => "nombre",
+            "width" => "100"
+        ));
+
+        /*
+        $Grid->columna(array(
+            "titulo" => "Tipo de Pregunta",
+            "campo" => "descripcion",
+            "width" => "100"
+        ));
+        */
+
+        $Grid->accion(array(
+            "icono" => "fas fa-arrow-circle-left",
+            "width" => "20",
+            "fnCallback" => function ($row) {
+                $cadena = '<a href="javascript:void(0)" style="color:black" onclick="xajax__operacionAgregarPregunta(\'' . $row["pregunta"] . '\', \'' . $row["seccion"] . '\', \'2\')"><i class="fa fa-times-circle"></i></a>';
+                return $cadena;
+            }
+        ));
+
+        $Grid->data(array(
+            "criterio" => $criterio,
+            "total" => $Grid->totalRegistros,
+            "pagina" => $pagina,
+            "nRegPagina" => $nreg_x_pag,
+            "class" => "pregunta",
+            "method" => "buscarAgregadas"
+        ));
+
+        $html = $Grid->render();
+        return $html;
+    }
+
     public function interfazNuevo()
     {
         $html = '
@@ -382,14 +465,16 @@ class interfazEncuestas
                     <div class="card-body" id="outQuerySeccion">
                         <table style="width:100%">
                             <tr>
-                                <td style="vertical-align: text-top">
-                                    <div id="DivConten-Selec">                                
+                                <td style="vertical-align: text-top;width:44%">
+                                    <div id="DivConten-Selec">
+                                                                        
                                     </div>
                                 </td>
-                                <td style="width:20px">
+                                <td style="width:2%">
                                 </td>
-                                <td style="vertical-align: text-top">
-                                    <div id="DivConten-NoSelec">                                 
+                                <td style="vertical-align: text-top;width:44%">
+                                    <div id="DivConten-NoSelec">
+                                                                         
                                     </div>
                                 </td>
                             </tr>                    
@@ -632,9 +717,51 @@ function _interfazEncuestasPreguntaNueva($flag, $encuesta)
         $('#btnAgregarSeccion').unbind('click').click(function() {
             xajax__seccionMantenimiento('1',xajax.getFormValues('form'));
         });");
+
+    $rpta->script("
+        $('#lstSeccion').unbind('change').change(function() {
+            xajax__encuestasPreguntasAgregadas(xajax.getFormValues('form'));
+            xajax__encuestasPreguntasDisponibles(xajax.getFormValues('form'));
+        });");
+
+
     return $rpta;
 }
 
+function _encuestasPreguntasDisponibles($criterio, $total_regs = 0, $pagina = 1, $nregs = 50)
+{
+    $rpta = new xajaxResponse();
+    $cls = new interfazEncuestas();
+    $html = $cls->datagridPreguntasDisponibles($criterio, $total_regs, $pagina, $nregs);
+    $rpta->assign("DivConten-NoSelec", "innerHTML", $html);
+    return $rpta;
+}
+
+function _encuestasPreguntasAgregadas($criterio, $total_regs = 0, $pagina = 1, $nregs = 50)
+{
+    $rpta = new xajaxResponse();
+    $cls = new interfazEncuestas();
+    $html = $cls->datagridPreguntasAgregadas($criterio, $total_regs, $pagina, $nregs);
+    $rpta->assign("DivConten-Selec", "innerHTML", $html);
+    return $rpta;
+}
+
+function _operacionAgregarPregunta($pregunta, $seccion, $flag = '1')
+{
+    $rpta = new xajaxResponse();
+    $claseencuesta = new encuestas();
+    if ($seccion == '') {
+        $rpta->alert("Debe Seleccionar una sección");
+    } else {
+
+        $result = $claseencuesta->mantenedorSeccionPregunta($flag, $seccion, $pregunta);
+        $rpta->script("
+                xajax__encuestasPreguntasAgregadas(xajax.getFormValues('form'));
+                xajax__encuestasPreguntasDisponibles(xajax.getFormValues('form'));
+                ");
+    }
+    return $rpta;
+}
 
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestas');
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasNuevo');
@@ -645,3 +772,6 @@ $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasSeccionNueva');
 $xajax->register(XAJAX_FUNCTION, '_seccionMantenimiento');
 $xajax->register(XAJAX_FUNCTION, '_interfazSeccionEditar');
 $xajax->register(XAJAX_FUNCTION, '_interfazEncuestasPreguntaNueva');
+$xajax->register(XAJAX_FUNCTION, '_encuestasPreguntasAgregadas');
+$xajax->register(XAJAX_FUNCTION, '_encuestasPreguntasDisponibles');
+$xajax->register(XAJAX_FUNCTION, '_operacionAgregarPregunta');

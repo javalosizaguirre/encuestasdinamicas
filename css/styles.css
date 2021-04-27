@@ -104,6 +104,31 @@ a {
   background-color: #1a237e;
 }
 
+.contenedor {
+  display: table;
+  border: 0px solid #000;
+  text-align: left;
+  margin: 0 auto;
+}
+.contenidos {
+  display: table-row;
+}
+.columnas {
+  display: table-cell;
+  border: 0px solid #000;
+  vertical-align: middle;
+}
+
+.colspan {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+
+.celdarelleno {
+  border-color: transparent;
+}
+
 @media screen and (max-width: 991px) {
   .logo {
     margin-left: 0px;

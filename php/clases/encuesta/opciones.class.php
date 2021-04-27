@@ -1,11 +1,11 @@
 <?php
 include_once RUTA_MYSQL . 'connection.class.php';
-class encuestas extends connectdb
+class opciones extends connectdb
 {
     function buscar($criterio, $buscar, $flagContar = 0, $paginaActual = 1, $regsPorPag = 20)
     {
         $data = array();
-        $query = "CALL sp_encuestasBuscar('$criterio', '$buscar', '$flagContar', '$paginaActual', '$regsPorPag')";
+        $query = "CALL sp_opcionesBuscar('$criterio', '$buscar', '$flagContar', '$paginaActual', '$regsPorPag')";
         // echo "buscar--->   ".$query;
         $result = parent::query($query);
 
@@ -27,12 +27,13 @@ class encuestas extends connectdb
     {
         $data = array();
         $usuario = $_SESSION["sys_usuario"];
-        $encuesta = isset($form["txtCodigo"]) ? $form["txtCodigo"] : '';
-        $titulo = isset($form["txtTitulo"]) ? $form["txtTitulo"] : '';
-        $bienvenida = isset($form["txtBienvenida"]) ? $form["txtBienvenida"] : '';
-        $despedida = isset($form["txtDespedida"]) ? $form["txtDespedida"] : '';
+        $pregunta = isset($form["txtCodigo"]) ? $form["txtCodigo"] : '';
+        $opcion = isset($form["hhddOpcion"]) ? $form["hhddOpcion"] : '';
+        $descripcion = isset($form["txtDescripcion"]) ? $form["txtDescripcion"] : '';
+        $orden = isset($form["txtOrden"]) ? $form["txtOrden"] : '';
         $activo = isset($form["chk_activo"]) ? $form["chk_activo"] : '0';
-        $query = "CALL sp_encuestasMantenedor('$flag', '$encuesta', '$titulo','$bienvenida','$despedida', '$activo', '$usuario')";
+
+        $query = "CALL sp_opcionesMantenedor('$flag','$opcion', '$pregunta','$descripcion','$orden','$activo', '$usuario')";
         $result = parent::query($query);
         if (!isset($result['error'])) {
             foreach ($result as $row) {
@@ -47,23 +48,7 @@ class encuestas extends connectdb
     function consultar($flag, $criterio)
     {
         $data = array();
-        $query = "CALL sp_encuestasConsultar('$flag', '$criterio')";
-        $result = parent::query($query);
-        if (!isset($result['error'])) {
-            foreach ($result as $row) {
-                $data[] = $row;
-            }
-        } else {
-            $this->setMsgErr($result['error']);
-        }
-        return $data;
-    }
-
-    function mantenedorSeccionPregunta($flag, $seccion, $pregunta, $orden = '')
-    {
-        $data = array();
-        $usuario = $_SESSION["sys_usuario"];
-        $query = "CALL sp_seccionpreguntaMantenedor('$flag', '$seccion', '$pregunta','$orden', '$usuario')";
+        $query = "CALL sp_opcionesConsultar('$flag', '$criterio')";
         $result = parent::query($query);
         if (!isset($result['error'])) {
             foreach ($result as $row) {

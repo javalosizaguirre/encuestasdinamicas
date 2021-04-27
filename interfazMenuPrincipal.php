@@ -49,6 +49,7 @@ $xajax->processRequest();
     <link rel="stylesheet" href="css/bootstrap-4.6.0-dist/bootstrap.min.css">
     <link rel="stylesheet" href="css/stylesidebar.css">
     <link rel="stylesheet" href="css/all.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/datagrid.css">
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
     <link href="tools/datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
